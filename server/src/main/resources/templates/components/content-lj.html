@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="content-lj">
+    <template id="contentLj">
+        <div>
+            <div style="display: flex;flex-direction: row-reverse;padding: 0 10px 10px 0">
+                <t-button variant="outline" theme="primary" @click="addLj">
+                    <template #icon>
+                        <t-icon name="add"/>
+                    </template>
+                    新增
+                </t-button>
+                <t-button variant="outline" theme="primary" @click="cxLj" style="margin-right: 10px">
+                    <template #icon>
+                        <t-icon name="search"/>
+                    </template>
+                    查询
+                </t-button>
+                <t-form
+                        label-width="calc(2em + 24px)"
+                        layout="inline"
+                        scroll-to-first-error="smooth"
+                >
+                    <t-form-item label="ID:" name="id">
+                        <t-input v-model="id"></t-input>
+                    </t-form-item>
+
+                    <t-form-item label="备注:" name="bz">
+                        <t-input v-model="bz"></t-input>
+                    </t-form-item>
+                </t-form>
+            </div>
+            <t-table
+                    row-key="index"
+                    :data="ljList"
+                    :columns="ljColumns"
+                    :pagination="ljPagination"
+                    maxHeight="600"
+            >
+                <template #id>
+                    id
+                    <t-tooltip content="关闭状态的连接将不会收到请求">
+                        <t-icon name="help-circle"></t-icon>
+                    </t-tooltip>
+                </template>
+                <template #idandyxbz="{ row }">
+                    <t-space>
+                        <t-switch v-model="row.yxbz" @change="changeYxbz(row)"></t-switch>
+                        <label>{{row.id}}</label>
+                    </t-space>
+                </template>
+                <template #ctrl="{ row }">
+                    <t-button shape="square" variant="text" @click="editLj(row)">
+                        <template #icon>
+                            <t-tooltip content="编辑" placement="bottom">
+                                <t-icon name="edit" style="color: cornflowerblue;"></t-icon>
+                            </t-tooltip>
+                        </template>
+                    </t-button>
+                    <t-button shape="square" variant="text">
+                        <template #icon>
+                            <t-popup destroy-on-close trigger="click">
+                                <t-tooltip content="查看代理连接" placement="bottom">
+                                    <t-icon name="tree-round-dot-vertical"
+                                            :style="!!row.proxy? '':'color: mediumseagreen;'"></t-icon>
+                                </t-tooltip>
+                                <template #content>
+                                    <t-list :split="true" size="small">
+                                        <t-list-item v-for="(proxy, index) in row.proxy">
+                                            {{proxy}}
+                                        </t-list-item>
+                                    </t-list>
+                                </template>
+                            </t-popup>
+                        </template>
+                    </t-button>
+                    <t-popconfirm content="确认删除吗" theme="warning" @confirm="delLj(row)">
+                        <t-button shape="square" variant="text">
+                            <template #icon>
+                                <t-tooltip content="删除" placement="bottom">
+                                    <t-icon name="delete" style="color: darkred;"></t-icon>
+                                </t-tooltip>
+                            </template>
+                        </t-button>
+                    </t-popconfirm>
+                </template>
+            </t-table>
+            <t-dialog
+                    v-model:visible="addLjDrag"
+                    placement="center"
+                    :header="addLjDragHeader"
+                    mode="modal"
+                    draggable
+                    :on-confirm="saveLj"
+            >
+                <template #body>
+                    <t-form
+                            :data="addFormData"
+                            label-width="60"
+                            label-align="top"
+                            scroll-to-first-error="smooth"
+                    >
+                        <t-form-item label="ID:" name="id">
+                            <t-input v-model="addFormData.id" :disabled="'编辑连接'==addLjDragHeader"></t-input>
+                        </t-form-item>
+                        <t-form-item label="许可:" name="license">
+                            <t-input v-model="addFormData.license"></t-input>
+                        </t-form-item>
+                        <t-form-item label="加密key:" name="msgKey">
+                            <t-input v-model="addFormData.msgKey"></t-input>
+                        </t-form-item>
+                        <t-form-item label="备注:" name="bz">
+                            <t-input v-model="addFormData.bz"></t-input>
+                        </t-form-item>
+                    </t-form>
+                </template>
+            </t-dialog>
+        </div>
+
+    </template>
+    <script>
+        const contentLj = {
+            template: "#contentLj",
+            data() {
+                return {
+                    ljList: reactive([]),
+                    ljColumns: [
+                        {colKey: "idandyxbz", title: "id", width: 360, ellipsis: true},
+                        {colKey: "license", title: "许可", width: 360, ellipsis: true},
+                        {colKey: "msgKey", title: "消息加密key", width: 360, ellipsis: true},
+                        {colKey: "bz", title: "备注", ellipsis: true},
+                        {colKey: "lrrq", title: "创建时间", width: 140, ellipsis: true},
+                        {colKey: "ctrl", title: "操作"},
+                    ],
+                    ljPagination: reactive({
+                        current: 1,
+                        pageSize: 10,
+                        total: 0,
+                        showJumper: true,
+                        onChange: (pageInfo) => {
+                            this.getData(pageInfo.current, pageInfo.pageSize, this.id, this.bz)
+                        },
+                    }),
+                    bz: ref(''),
+                    id: ref(''),
+                    addLjDrag: ref(false),
+                    addFormData: reactive({id: '', license: '', msgKey: '', bz: '', yxbz: true}),
+                    addLjDragHeader: ''
+                }
+            },
+            mounted() {
+                this.getData(1, 10);
+            },
+            methods: {
+                saveLj() {
+                    axios.post('/client', this.addFormData).then(res => {
+                        MessagePlugin.success('操作成功');
+                        this.addLjDrag = false;
+                        if ('新增连接' == this.addLjDragHeader) {
+                            this.getData(1, this.ljPagination.pageSize);
+                        } else {
+                            this.getData(this.ljPagination.current, this.ljPagination.pageSize, this.id, this.bz);
+                        }
+                    }).catch(err => {
+                        MessagePlugin.error(err.message);
+                    })
+                },
+                addLj() {
+                    this.addLjDragHeader = '新增连接';
+                    this.addFormData.id = '';
+                    this.addFormData.license = '';
+                    this.addFormData.msgKey = '';
+                    this.addFormData.bz = '';
+                    this.addFormData.yxbz = true;
+                    this.addLjDrag = true;
+                },
+                cxLj() {
+                    this.getData(1, this.ljPagination.pageSize, this.id, this.bz);
+                },
+                editLj(ljInfo) {
+                    this.addLjDragHeader = '编辑连接';
+                    this.addFormData.id = ljInfo.id;
+                    this.addFormData.license = ljInfo.license;
+                    this.addFormData.msgKey = ljInfo.msgKey;
+                    this.addFormData.bz = ljInfo.bz;
+                    this.addFormData.yxbz = ljInfo.yxbz;
+                    this.addLjDrag = true;
+                },
+                changeYxbz(row) {
+                    axios.put('/client', row).then(res => {
+                        if (res.data > 0) {
+                            MessagePlugin.success('操作成功');
+                        } else {
+                            row.yxbz = !row.yxbz;
+                            MessagePlugin.error("更新失败");
+                        }
+                    }).catch(err => {
+                        row.yxbz = !row.yxbz;
+                        MessagePlugin.error(err.message);
+                    })
+                },
+                delLj(row) {
+                    axios.delete('/client/' + row.id).then(res => {
+                        MessagePlugin.success('操作成功');
+                        this.getData(this.ljPagination.current, this.ljPagination.pageSize, this.id, this.bz);
+                    }).catch(err => {
+                        MessagePlugin.error(err.message);
+                    })
+                },
+                pageChangeCallback(data) {
+                    this.ljList.length = 0;
+                    this.ljList.push(...data.content);
+                    this.ljPagination.total = data.total;
+                    this.ljPagination.current = data.current;
+                    this.ljPagination.pageSize = data.pageSize;
+                },
+                getData(n, s, id = '', bz = '') {
+                    // n当前页，s每页大小
+                    axios.get('/client/findAll?n=' + n + '&s=' + s + "&id=" + id + "&bz=" + bz)
+                        .then(res => {
+                            let data = res.data
+                            this.pageChangeCallback({
+                                total: data.total,
+                                current: n,
+                                pageSize: s,
+                                content: data.content
+                            })
+                        })
+                },
+            }
+        }
+    </script>
+</div>
+</html>

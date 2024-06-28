@@ -1,0 +1,25 @@
+<template id="content">
+    <div th:switch="${menuValue}" style="margin: 10px;border-radius: 2px">
+        <div th:case="'/'">
+            111
+        </div>
+        <div th:case="'/lj'">
+            <content-lj />
+        </div>
+        <div th:case="'/zs'">
+            <content-zs />
+        </div>
+    </div>
+</template>
+<template th:replace="~{/components/content-lj}"></template>
+<template th:replace="~{/components/content-zs}"></template>
+<script>
+    // const menuValue = '[[${menuValue}]]' ;
+    const layoutContent = {
+        template: "#content",
+        components: {
+            contentZs,
+            contentLj
+        }
+    }
+</script>

@@ -1,0 +1,29 @@
+<template id="layout-header">
+    <div>
+        <t-head-menu class="tdesign-starter-header-menu" expand-type="popup">
+            <template #operations>
+                <div class="operations-container">
+                    <!-- 搜索框 -->
+
+                    <!-- 全局通知 -->
+
+                    <t-tooltip content="code" placement="bottom">
+                        <t-button shape="square" theme="default" variant="text">
+                            <t-icon name="logo-github"/>
+                        </t-button>
+                    </t-tooltip>
+                    <t-tooltip content="help" placement="bottom">
+                        <t-button shape="square" theme="default" variant="text">
+                            <t-icon name="help-circle"/>
+                        </t-button>
+                    </t-tooltip>
+                </div>
+            </template>
+        </t-head-menu>
+    </div>
+</template>
+<script>
+    const layoutHeader = {
+        template: "#layout-header"
+    }
+</script>

@@ -1,0 +1,45 @@
+server:
+  port: 9001
+spring:
+  application:
+    name: server
+  devtools:
+    restart:
+      additional-paths: resources/**
+      enabled: true
+  thymeleaf:
+    cache: false
+  datasource:
+    url: jdbc:sqlite:E:\myProject\onlyone\server\src\main\resources\onlyone.db
+#    url: jdbc:sqlite:classpath:onlyone.db
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+
+onlyone:
+  server:
+    host: 127.0.0.1
+    port: 9999
+    jks: E:\myProject\onlyone\server\src\main\resources\server.jks
+    filepath: E:\gogs
+  client:
+    id: id
+    licence: pYuPplpdZbcOimYR
+    msgKey: stKvmdvWrpPBaOKI
+    proxy:
+      - url: test.abcd.test  # 可处理的url前缀
+        ip: 127.0.0.1  # 实际处理程序的ip
+        port: ${server.port}     # 实际处理程序的端口
+
+logging:
+  pattern:
+    correlation:
+  level:
+    web: debug
+#    com:
+#      devsss:
+#        onlyone:
+#          core: debug

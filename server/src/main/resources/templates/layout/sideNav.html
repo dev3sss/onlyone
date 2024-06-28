@@ -1,0 +1,20 @@
+<template id="sideNav">
+    <t-menu th:value="${menuValue}">
+        <template #logo>
+           <span th:text="${logo}">
+               LOGO
+           </span>
+        </template>
+        <t-menu-item value="/" href="/">首页</t-menu-item>
+        <t-menu-item value="/lj" href="/lj">连接管理</t-menu-item>
+        <t-menu-item value="/zs" href="/zs">证书管理</t-menu-item>
+        <template #operations>
+            <span> pgk.version</span>
+        </template>
+    </t-menu>
+</template>
+<script>
+    const layoutSideNav = {
+        template: "#sideNav"
+    }
+</script>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<configuration scan="true" scanPeriod="3 seconds">
+    <property name="pattern-color"
+              value="%d %highlight(%-5level) %green(%logger{20}) - %highlight(%msg) %n"/>
+    <!-- 控制台输出 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${pattern-color}</pattern>
+            <charset>GBK</charset>
+            <!--<charset>UTF-8</charset>-->
+        </encoder>
+    </appender>
+
+    <logger name="com.devsss" level="DEBUG">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <!--    <root>-->
+    <!--        <level value="DEBUG"/>-->
+    <!--        <appender-ref ref="CONSOLE"/>-->
+    <!--    </root>-->
+</configuration>

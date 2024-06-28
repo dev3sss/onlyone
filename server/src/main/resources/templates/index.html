@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Title</title>
+    <link th:href="@{/css/tdesign-vue-next1.8.1.min.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+    <script src="/js/vue3.4.19.global.js"></script>
+    <script src="/js/axios.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/js/tdesign-vue-next1.8.1.min.js"></script>
+</head>
+<body>
+<div id="app">
+    <t-layout key="no-side">
+        <t-aside>
+            <t-affix :offset-top="0" id="side-nav">
+                <layout-side-nav/>
+            </t-affix>
+        </t-aside>
+        <t-layout>
+            <t-header>
+                <t-affix :offset-top="0">
+                    <layout-header/>
+                </t-affix>
+            </t-header>
+            <t-content>
+                <layout-content/>
+            </t-content>
+        </t-layout>
+    </t-layout>
+</div>
+<template th:replace="~{/layout/header}"></template>
+<template th:replace="~{/layout/sideNav}"></template>
+<template th:replace="~{/layout/content}"></template>
+<script src="/js/main.js"></script>
+</body>
+</html>

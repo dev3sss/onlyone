@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="content-zs">
+    <template id="contentZs">
+        <t-affix>
+            <div id="zs-search">
+                <div style="width: 50%;display: flex">
+                    <t-input size="large" placeholder="请输入域名" clearable v-model="search"></t-input>
+                    &nbsp;
+                    <t-button variant="outline" @click="uploadBtn" size="large">
+                        <template #icon>
+                            <t-icon name="cloud-upload" size="32"/>
+                        </template>
+                        上传证书
+                    </t-button>
+                </div>
+            </div>
+        </t-affix>
+        <t-space break-line id="zs-show">
+            <t-card v-for="zs in showZsList" size="small" :title="zs.alias" hover-shadow class="zs-show-card">
+                <t-descriptions :column="1" size="small">
+                    <t-descriptions-item label="date">
+                        <t-tag max-width="300">
+                            {{strDateToYMD(zs.notBefore)}}至{{strDateToYMD(zs.notAfter)}}
+                        </t-tag>
+                    </t-descriptions-item>
+                    <t-descriptions-item label="issuer">
+                        <t-tag max-width="300" :title="zs.issuer">
+                            {{zs.issuer}}
+                        </t-tag>
+                    </t-descriptions-item>
+                    <t-descriptions-item label="subject">
+                        <t-tag max-width="300" :title="zs.subject">
+                            {{zs.subject}}
+                        </t-tag>
+                    </t-descriptions-item>
+                    <t-descriptions-item label="algorithm">
+                        <t-tag max-width="300">
+                            {{zs.algorithm}}
+                        </t-tag>
+                    </t-descriptions-item>
+                </t-descriptions>
+            </t-card>
+        </t-space>
+        <t-dialog
+                v-model:visible="addZsDrag"
+                placement="center"
+                header="添加证书文件"
+                mode="modal"
+                draggable
+                :on-confirm="saveZs"
+        >
+            <template #body>
+                <t-alert theme="info" size="small"
+                         message="需上传 .key 和 .pem 文件，同类型文件多次上传可覆盖"></t-alert>
+                <!--        上传区域-->
+                <div style="margin-top: 10px">
+                    <t-upload
+                            :auto-upload="true"
+                            draggable
+                            :request-method="uploadPem"
+                            theme="custom"
+                            class="zs-upload"
+                    >
+                        <template #default="params">
+                            <div class="zs-upload-content" @click="triggerUpload">
+                                <t-skeleton
+                                        :loading="params && params.dragActive"
+                                        :row-col="[{type: 'rect',content: () => '松开鼠标上传文件',},]"
+                                        class="zs-upload-content-tips"
+                                >
+                                    <!--            上传文件操作提示-->
+                                    <div style="display: flex">
+                                        <div>
+                                            拖拽文件&nbsp;/&nbsp;
+                                        </div>
+                                        <t-link theme="primary" @click="triggerUpload">点击上传</t-link>
+                                    </div>
+                                    <div style="display: flex;height: 22px">
+                                        <!--            上传进度-->
+                                        <div style="flex: 1">
+                                            <div v-if="uploadFileStatus.status !== 0" style="display: flex">
+                                                <div style="width: 100px; align-self: center">
+                                                    <t-progress
+                                                            theme="line"
+                                                            :percentage="uploadFileStatus.progressValue"
+                                                            :status="progressStatus"
+                                                            :color="{ from: '#0052D9', to: '#00A870' }">
+                                                    </t-progress>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t-skeleton>
+                            </div>
+                            <!-- <p v-if="params && params.dragActive">释放鼠标</p> -->
+                            <!-- <span>数据状态：{{params}}</span> -->
+                        </template>
+                    </t-upload>
+                </div>
+                <!-- 结果解析区域 -->
+                <div>
+                    <t-card :title="zsObj.key.originalFilename" hover-shadow
+                            v-if="zsObj.key.size != 0" class="zs-fileinfo-card">
+                        size : {{zsObj.key.size}}<br>
+                        algorithm: {{zsObj.key.algorithm}}
+                    </t-card>
+                    <t-card v-else title="未上传 .key 文件" class="zs-fileinfo-card" hover-shadow>
+                        size : -<br>
+                        algorithm: -
+                    </t-card>
+                    <t-card :title="zsObj.cert.originalFilename" hover-shadow
+                            v-if="zsObj.cert.size != 0" class="zs-fileinfo-card">
+                        size : {{zsObj.cert.size}}<br>
+                        date : {{strDateToYMD(zsObj.cert.notBefore)}}至{{strDateToYMD(zsObj.cert.notAfter)}}<br>
+                        issuer : {{zsObj.cert.issuer}}<br>
+                        subject: {{zsObj.cert.subject}}
+                    </t-card>
+                    <t-card v-else title="未上传 .pem 文件" class="zs-fileinfo-card" hover-shadow>
+                        size : -<br>
+                        date : -<br>
+                        issuer : -<br>
+                        subject: -
+                    </t-card>
+                </div>
+            </template>
+        </t-dialog>
+    </template>
+    <script>
+        const contentZs = {
+            template: "#contentZs",
+            data() {
+                return {
+                    search: ref(''),
+                    uploadFileStatus: reactive({
+                        progressValue: 0,
+                        status: 0,
+                        url: "",
+                    }),
+                    addZsDrag: ref(false),
+                    zsObj: reactive({
+                        key: {
+                            originalFilename: '',
+                            saveFilename: '',
+                            size: 0,
+                            fileType: '',
+                            algorithm: ''
+                        },
+                        cert: {
+                            originalFilename: '',
+                            saveFilename: '',
+                            size: 0,
+                            fileType: '',
+                            notBefore: '',
+                            notAfter: '',
+                            issuer: '',
+                            subject: ''
+                        }
+                    }),
+                    zsList: reactive([]),
+                    showZsList: reactive([])
+                }
+            },
+            watch: {
+                search(newVal,oldVal) {
+                    this.showZsList.length = 0;
+                    this.zsList.forEach(v => {
+                        if (v.alias.indexOf(newVal) > -1) {
+                            this.showZsList.push(v)
+                        }
+                    })
+                }
+            },
+            computed: {
+                progressStatus() {
+                    if (this.uploadFileStatus.status === 3) {
+                        return "error";
+                    }
+                    if (this.uploadFileStatus.progressValue === 100) {
+                        this.uploadFileStatus.status = 4;
+                        return "success";
+                    }
+                    return "active";
+                },
+            },
+            mounted() {
+                this.getAllZsInfo();
+            },
+            methods: {
+                uploadBtn() {
+                    this.zsObj.key.size = 0;
+                    this.zsObj.cert.size = 0;
+                    this.addZsDrag = true;
+                },
+                uploadPem(file) {
+                    return new Promise((resolve) => {
+                        // file.percent 用于控制上传进度，如果不希望显示上传进度，则不对 file.percent 设置值即可。
+                        // 如果代码规范不能设置 file.percent，也可以设置 files
+                        this.uploadFileStatus.progressValue = 0;
+                        this.uploadFileStatus.status = 1;
+                        let resp = {
+                            status: "success",
+                            response: {},
+                        };
+                        let format = new window.FormData();
+                        const fileData = file.raw;
+                        format.append("file", fileData);
+                        let obj = this;
+                        uploadFile("/keystore/uploadPem", format, (progressEvent) => {
+                            obj.uploadFileStatus.progressValue = Math.floor(
+                                (progressEvent.loaded / progressEvent.total) * 50
+                            );
+                            //  等于50的时候说明上传完成了，要等后台处理
+                            if (obj.uploadFileStatus.progressValue === 50) {
+                                let timer = setInterval(function () {
+                                    if (obj.uploadFileStatus.progressValue < 95) {
+                                        obj.uploadFileStatus.progressValue += 7;
+                                    } else {
+                                        clearInterval(timer);
+                                    }
+                                }, 200);
+                            }
+                        }).then((res) => {
+                            resp.response = res.data;
+                            resp.response.url = resp.response.originalFilename;
+                            obj.uploadFileStatus.url = resp.response.originalFilename;
+                            obj.uploadFileStatus.status = 4;
+                            obj.uploadFileStatus.progressValue = 100;
+                            if (res.data.fileType == ".key") {
+                                obj.zsObj.key = res.data;
+                            } else {
+                                obj.zsObj.cert = res.data;
+                            }
+                            resolve(resp);
+                        }).catch((err) => {
+                            resp.status = "fail";
+                            obj.uploadFileStatus.status = 3;
+                            MessagePlugin.error(err.message)
+                            resolve(resp);
+                        });
+                    });
+                },
+                triggerUpload(e) {
+                    // 控制仅指定div点击时触发选择文件
+                    if (e.target.className.indexOf('link') < 0) {
+                        e.stopPropagation();
+                    }
+                },
+                saveZs() {
+                    axios.post('/keystore/save', {
+                        key: this.zsObj.key,
+                        cert: this.zsObj.cert
+                    }).then(res => {
+                        MessagePlugin.success("保存成功")
+                    }).catch(err => {
+                        MessagePlugin.error(err.message)
+                    })
+                },
+                strDateToYMD(d) {
+                    return strDateToYMD(d)
+                },
+                getAllZsInfo() {
+                    axios.get('/keystore').then(res => {
+                        this.zsList.push(...res.data);
+                        this.showZsList.push(...res.data);
+                    })
+                }
+            }
+        }
+    </script>
+</div>
+</html>

@@ -1,0 +1,14 @@
+
+onlyone:
+  server:
+    host: 127.0.0.1
+    port: 9999
+  client:
+    id: aaa
+    licence: XkyITQbBIZcLYuML
+    msgKey: bRruXhujbraLpJSk
+    retry: 20 # 连接服务端失败重试间隔(秒)
+    proxy:
+      - url: abcd.test  # 可处理的url前缀
+        ip: 127.0.0.1  # 实际处理程序的ip
+        port: 8888     # 实际处理程序的端口

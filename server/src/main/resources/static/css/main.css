@@ -1,0 +1,54 @@
+body, #app {
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+}
+
+#side-nav .t-default-menu {
+    height: 100vh !important;
+}
+
+/*文件上传组件*/
+.zs-upload .t-upload__dragger-center, .zs-upload .t-upload__dragger {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: 150px !important;
+}
+
+/*文件上传内容触发区域*/
+.zs-upload .t-upload__trigger, .zs-upload-content, .zs-upload-content-tips {
+    height: 100% !important;
+    width: 100% !important;
+}
+
+.zs-upload-content-tips {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#zs-search {
+    display: flex;
+    margin: 10px;
+    justify-content: center;
+}
+
+.zs-fileinfo-card {
+    margin: 10px 0;
+}
+
+#zs-show {
+    margin: auto;
+    width: 100%;
+}
+
+#zs-show .t-space-item {
+    width: 32%;
+    margin: 0;
+}
+
+.zs-show-card {
+    margin: 5px;
+}
