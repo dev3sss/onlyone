@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="login">
+    <template id="login">
+        <div class="login-content">
+            <div class="login-content-left">
+
+            </div>
+            <div class="login-form">
+                <t-form ref="form" :data="formData" :colon="true" :label-width="0" @reset="onReset"
+                        @submit="onSubmit">
+                    <t-form-item name="account">
+                        <t-input v-model="formData.username" clearable placeholder="请输入账户名">
+                            <template #prefix-icon>
+                                <t-icon name="desktop"/>
+                            </template>
+                        </t-input>
+                    </t-form-item>
+
+                    <t-form-item name="password">
+                        <t-input v-model="formData.password" type="password" clearable placeholder="请输入密码">
+                            <template #prefix-icon>
+                                <t-icon name="lock-on"/>
+                            </template>
+                        </t-input>
+                    </t-form-item>
+
+                    <t-form-item>
+                        <t-button theme="primary" type="submit" block>登录</t-button>
+                    </t-form-item>
+                </t-form>
+            </div>
+        </div>
+
+    </template>
+    <script>
+        const login = {
+            template: "#login",
+            data() {
+                return {
+                    formData: reactive({
+                        username: '',
+                        password: '',
+                    })
+                }
+            },
+            methods: {
+                onReset() {
+                    MessagePlugin.success('重置成功');
+                },
+
+                onSubmit({validateResult, firstError}) {
+                    if (validateResult === true) {
+                        MessagePlugin.success('提交成功');
+                        axios.post('/jwtLogin', this.formData).then(res => {
+                            console.log(res);
+                            addCookie('token', res.data);
+                            window.location.href = '/';
+                        }).catch(err => {
+                            MessagePlugin.error('登录失败: ' + err.message);
+                        });
+                    } else {
+                        console.log('Validate Errors: ', firstError, validateResult);
+                        MessagePlugin.warning(firstError);
+                    }
+                }
+            }
+        }
+    </script>
+</div>
+</html>

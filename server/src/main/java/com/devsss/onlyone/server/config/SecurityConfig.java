@@ -6,12 +6,11 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -27,17 +26,10 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 @Configuration
 public class SecurityConfig {
-
-    @Value("${jwt.publickey}")
-    RSAPublicKey key;
-
-    @Value("${jwt.privatekey}")
-    RSAPrivateKey priv;
 
     @Bean
     public KeyPair createKeyPair() throws NoSuchAlgorithmException {
@@ -52,10 +44,16 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain web(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
-                .csrf((csrf) -> csrf.ignoringRequestMatchers("/token"))
-                .httpBasic(Customizer.withDefaults())
-                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
+                .authorizeHttpRequests((authorize) ->
+                        authorize.requestMatchers(
+                                "/login","/jwtLogin","/css/**","/js/**","/favicon.ico","/image/**"
+                                ,"/","/lj","/zs").permitAll()
+                                .anyRequest().authenticated())
+                .formLogin(form -> form.loginPage("/login"))
+                .csrf(AbstractHttpConfigurer::disable)
+                .oauth2ResourceServer( c -> {
+                    c.jwt(Customizer.withDefaults());
+                })
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling((exceptions) -> exceptions
                         .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
@@ -77,7 +75,7 @@ public class SecurityConfig {
 
     @Bean
     JwtEncoder jwtEncoder(KeyPair keyPair) {
-        JWK jwk = new RSAKey.Builder(this.key).privateKey(keyPair.getPrivate()).build();
+        JWK jwk = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic()).privateKey(keyPair.getPrivate()).build();
         JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
     }

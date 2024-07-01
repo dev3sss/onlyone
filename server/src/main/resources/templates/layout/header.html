@@ -7,14 +7,19 @@
 
                     <!-- 全局通知 -->
 
-                    <t-tooltip content="code" placement="bottom">
+                    <t-tooltip content="源码" placement="bottom">
                         <t-button shape="square" theme="default" variant="text">
                             <t-icon name="logo-github"/>
                         </t-button>
                     </t-tooltip>
-                    <t-tooltip content="help" placement="bottom">
+                    <t-tooltip content="帮助" placement="bottom">
                         <t-button shape="square" theme="default" variant="text">
                             <t-icon name="help-circle"/>
+                        </t-button>
+                    </t-tooltip>
+                    <t-tooltip content="登出" placement="bottom">
+                        <t-button shape="square" theme="default" variant="text" @click="logout">
+                            <t-icon name="logout"/>
                         </t-button>
                     </t-tooltip>
                 </div>
@@ -24,6 +29,12 @@
 </template>
 <script>
     const layoutHeader = {
-        template: "#layout-header"
+        template: "#layout-header",
+        methods: {
+            logout() {
+                removeCookie("token");
+                window.location.href = "/login";
+            }
+        }
     }
 </script>

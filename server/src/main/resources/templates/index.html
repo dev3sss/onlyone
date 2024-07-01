@@ -12,7 +12,8 @@
 </head>
 <body>
 <div id="app">
-    <t-layout key="no-side">
+    <login th:if='${needLogin == "1"}'/>
+    <t-layout key="no-side" th:if='${needLogin != "1"}'>
         <t-aside>
             <t-affix :offset-top="0" id="side-nav">
                 <layout-side-nav/>
@@ -29,10 +30,12 @@
             </t-content>
         </t-layout>
     </t-layout>
+
 </div>
 <template th:replace="~{/layout/header}"></template>
 <template th:replace="~{/layout/sideNav}"></template>
 <template th:replace="~{/layout/content}"></template>
+<template th:replace="~{/components/login}"></template>
 <script src="/js/main.js"></script>
 </body>
 </html>

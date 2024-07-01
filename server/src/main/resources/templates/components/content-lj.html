@@ -62,7 +62,7 @@
                             <t-popup destroy-on-close trigger="click">
                                 <t-tooltip content="查看代理连接" placement="bottom">
                                     <t-icon name="tree-round-dot-vertical"
-                                            :style="!!row.proxy? '':'color: mediumseagreen;'"></t-icon>
+                                            :style="!!row.proxy? 'color: mediumseagreen;':'color: red;'"></t-icon>
                                 </t-tooltip>
                                 <template #content>
                                     <t-list :split="true" size="small">

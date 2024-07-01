@@ -52,3 +52,20 @@ body, #app {
 .zs-show-card {
     margin: 5px;
 }
+
+.login-content {
+    width: 80%;
+    height: 100%;
+    background-image: url("/image/login-bg-1.png");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.login-form {
+    width: 310px;
+    padding: 10px;
+    margin: 0;
+    top: 30%;
+    left: 75%;
+    position: relative;
+}

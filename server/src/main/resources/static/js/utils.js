@@ -4,8 +4,26 @@ const {reactive} = Vue
 axios.interceptors.request.use(
     config => {
         const token = getCookieValue("token")
-        token && (config.headers.token = token)
+        token && (config.headers.Authorization = "Bearer " + token)
         return config
+    }
+)
+
+axios.interceptors.response.use(
+    response => {
+        return response
+    },
+    error => {
+        if (error.response.status === 401) {
+            removeCookie("token")
+            window.location.href = "/login"
+        } else {
+            if (!!error.response.data.message) {
+                MessagePlugin.error(error.response.data.message)
+            } else {
+                MessagePlugin.error(error.message)
+            }
+        }
     }
 )
 
@@ -14,7 +32,12 @@ function getCookieObj() {
         return {}
     }
     let obJson = document.cookie.split("=")[1];
-    return JSON.parse(obJson)
+    try {
+        return JSON.parse(obJson)
+    } catch (e) {
+        console.log(e)
+        return {}
+    }
 }
 
 function removeCookie(key) {
