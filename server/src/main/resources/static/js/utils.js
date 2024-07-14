@@ -16,13 +16,15 @@ axios.interceptors.response.use(
     error => {
         if (error.response.status === 401) {
             removeCookie("token")
-            window.location.href = "/login"
-        } else {
-            if (!!error.response.data.message) {
-                MessagePlugin.error(error.response.data.message)
+            if (window.location.pathname !== '/login') {
+                window.location.href = "/login"
             } else {
-                MessagePlugin.error(error.message)
+                return Promise.reject(error)
             }
+        } else {
+            let msg = error.message
+            MessagePlugin.error(msg)
+            return Promise.reject(error)
         }
     }
 )

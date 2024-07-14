@@ -121,8 +121,12 @@ public class KeyStoreService {
      */
     public void saveZs(PemFileInfo key, PemFileInfo cert) throws Exception {
         final String path = config.getFilepath() + "/temp/";
-        KeyPair keyPair = KeyStoreUtils.loadPEMKey(path + key.getSaveFilename());
-        Object[] certObj = KeyStoreUtils.loadPEMCert(path + cert.getSaveFilename());
+        loadCertFileToJks(path + key.getSaveFilename(), path + cert.getSaveFilename());
+    }
+
+    public void loadCertFileToJks(String keyPath, String certPath) throws Exception {
+        KeyPair keyPair = KeyStoreUtils.loadPEMKey(keyPath);
+        Object[] certObj = KeyStoreUtils.loadPEMCert(certPath);
         X509CertificateHolder o = (X509CertificateHolder) certObj[0];
         Certificate certificate = (Certificate) certObj[1];
         String alias = "";

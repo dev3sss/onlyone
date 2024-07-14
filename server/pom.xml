@@ -84,6 +84,23 @@
             <artifactId>gson</artifactId>
             <version>${google.gson.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.tencentcloudapi</groupId>
+            <artifactId>tencentcloud-sdk-java</artifactId>
+            <!-- go to https://search.maven.org/search?q=tencentcloud-sdk-java and get the latest version. -->
+            <!-- 请到https://search.maven.org/search?q=tencentcloud-sdk-java查询所有版本，最新版本如下 -->
+            <version>3.1.1050</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -110,7 +127,44 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+                <version>3.0.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <excludes>
+                        <!--分离打包的配置文件-->
+                        <exclude>application.yml</exclude>
+                        <exclude>onlyone.db</exclude>
+                        <exclude>server.jks</exclude>
+                        <exclude>trustedCerts.jks</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
         </plugins>
+<!--        <resources>-->
+<!--            &lt;!&ndash;控制资源文件的拷贝&ndash;&gt;-->
+<!--            <resource>-->
+<!--                &lt;!&ndash;用的idea打包时需要修改src/main/java/resources为src/main/resources否则配置文件打包不到,运行时又需要改回去,否则无法运行&ndash;&gt;-->
+<!--                <directory>src/main/resources</directory>-->
+<!--                <includes>-->
+<!--                    <include>application.yml</include>-->
+<!--                    <include>onlyone.db</include>-->
+<!--                    <include>server.jks</include>-->
+<!--                    <include>trustedCerts.jks</include>-->
+<!--                </includes>-->
+<!--                <filtering>false</filtering>-->
+<!--                <targetPath>${project.build.directory}/config</targetPath>-->
+<!--            </resource>-->
+<!--        </resources>-->
     </build>
 
 </project>

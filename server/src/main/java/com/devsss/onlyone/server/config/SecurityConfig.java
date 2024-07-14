@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -30,6 +31,12 @@ import java.security.interfaces.RSAPublicKey;
 
 @Configuration
 public class SecurityConfig {
+
+    @Value("${onlyone.admin.user}")
+    private String userName;
+
+    @Value("${onlyone.admin.password}")
+    private String password;
 
     @Bean
     public KeyPair createKeyPair() throws NoSuchAlgorithmException {
@@ -64,8 +71,7 @@ public class SecurityConfig {
 
     @Bean
     InMemoryUserDetailsManager inMemoryUserDetailsManager() {
-        String generatedPassword = "123456";
-        return new InMemoryUserDetailsManager(User.withUsername("user").password(generatedPassword).roles("USER").build());
+        return new InMemoryUserDetailsManager(User.withUsername(userName).password(password).roles("USER").build());
     }
 
     @Bean

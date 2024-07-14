@@ -35,8 +35,14 @@ body, #app {
     justify-content: center;
 }
 
+.zs-fileinfo {
+    display: flex;
+    justify-content: space-between;
+}
+
 .zs-fileinfo-card {
     margin: 10px 0;
+    width: 49%;
 }
 
 #zs-show {

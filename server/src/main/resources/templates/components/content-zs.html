@@ -11,7 +11,7 @@
                         <template #icon>
                             <t-icon name="cloud-upload" size="32"/>
                         </template>
-                        上传证书
+                        添加证书
                     </t-button>
                 </div>
             </div>
@@ -48,81 +48,118 @@
                 header="添加证书文件"
                 mode="modal"
                 draggable
-                :on-confirm="saveZs"
+                width="900px"
+                :footer="false"
         >
             <template #body>
-                <t-alert theme="info" size="small"
-                         message="需上传 .key 和 .pem 文件，同类型文件多次上传可覆盖"></t-alert>
-                <!--        上传区域-->
-                <div style="margin-top: 10px">
-                    <t-upload
-                            :auto-upload="true"
-                            draggable
-                            :request-method="uploadPem"
-                            theme="custom"
-                            class="zs-upload"
-                    >
-                        <template #default="params">
-                            <div class="zs-upload-content" @click="triggerUpload">
-                                <t-skeleton
-                                        :loading="params && params.dragActive"
-                                        :row-col="[{type: 'rect',content: () => '松开鼠标上传文件',},]"
-                                        class="zs-upload-content-tips"
-                                >
-                                    <!--            上传文件操作提示-->
-                                    <div style="display: flex">
-                                        <div>
-                                            拖拽文件&nbsp;/&nbsp;
-                                        </div>
-                                        <t-link theme="primary" @click="triggerUpload">点击上传</t-link>
-                                    </div>
-                                    <div style="display: flex;height: 22px">
-                                        <!--            上传进度-->
-                                        <div style="flex: 1">
-                                            <div v-if="uploadFileStatus.status !== 0" style="display: flex">
-                                                <div style="width: 100px; align-self: center">
-                                                    <t-progress
-                                                            theme="line"
-                                                            :percentage="uploadFileStatus.progressValue"
-                                                            :status="progressStatus"
-                                                            :color="{ from: '#0052D9', to: '#00A870' }">
-                                                    </t-progress>
+                <t-tabs :default-value="1">
+                    <t-tab-panel :value="1" label="上传证书">
+                        <t-alert theme="info" size="small"
+                                 message="需上传 .key 和 .pem 文件，同类型文件多次上传可覆盖"></t-alert>
+                        <!--        上传区域-->
+                        <div style="margin-top: 10px">
+                            <t-upload
+                                    :auto-upload="true"
+                                    draggable
+                                    :request-method="uploadPem"
+                                    theme="custom"
+                                    class="zs-upload"
+                            >
+                                <template #default="params">
+                                    <div class="zs-upload-content" @click="triggerUpload">
+                                        <t-skeleton
+                                                :loading="params && params.dragActive"
+                                                :row-col="[{type: 'rect',content: () => '松开鼠标上传文件',},]"
+                                                class="zs-upload-content-tips"
+                                        >
+                                            <!--            上传文件操作提示-->
+                                            <div style="display: flex">
+                                                <div>
+                                                    拖拽文件&nbsp;/&nbsp;
+                                                </div>
+                                                <t-link theme="primary" @click="triggerUpload">点击上传</t-link>
+                                            </div>
+                                            <div style="display: flex;height: 22px">
+                                                <!--            上传进度-->
+                                                <div style="flex: 1">
+                                                    <div v-if="uploadFileStatus.status !== 0" style="display: flex">
+                                                        <div style="width: 100px; align-self: center">
+                                                            <t-progress
+                                                                    theme="line"
+                                                                    :percentage="uploadFileStatus.progressValue"
+                                                                    :status="progressStatus"
+                                                                    :color="{ from: '#0052D9', to: '#00A870' }">
+                                                            </t-progress>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </t-skeleton>
                                     </div>
-                                </t-skeleton>
-                            </div>
-                            <!-- <p v-if="params && params.dragActive">释放鼠标</p> -->
-                            <!-- <span>数据状态：{{params}}</span> -->
-                        </template>
-                    </t-upload>
-                </div>
-                <!-- 结果解析区域 -->
-                <div>
-                    <t-card :title="zsObj.key.originalFilename" hover-shadow
-                            v-if="zsObj.key.size != 0" class="zs-fileinfo-card">
-                        size : {{zsObj.key.size}}<br>
-                        algorithm: {{zsObj.key.algorithm}}
-                    </t-card>
-                    <t-card v-else title="未上传 .key 文件" class="zs-fileinfo-card" hover-shadow>
-                        size : -<br>
-                        algorithm: -
-                    </t-card>
-                    <t-card :title="zsObj.cert.originalFilename" hover-shadow
-                            v-if="zsObj.cert.size != 0" class="zs-fileinfo-card">
-                        size : {{zsObj.cert.size}}<br>
-                        date : {{strDateToYMD(zsObj.cert.notBefore)}}至{{strDateToYMD(zsObj.cert.notAfter)}}<br>
-                        issuer : {{zsObj.cert.issuer}}<br>
-                        subject: {{zsObj.cert.subject}}
-                    </t-card>
-                    <t-card v-else title="未上传 .pem 文件" class="zs-fileinfo-card" hover-shadow>
-                        size : -<br>
-                        date : -<br>
-                        issuer : -<br>
-                        subject: -
-                    </t-card>
-                </div>
+                                    <!-- <p v-if="params && params.dragActive">释放鼠标</p> -->
+                                    <!-- <span>数据状态：{{params}}</span> -->
+                                </template>
+                            </t-upload>
+                        </div>
+                        <!-- 结果解析区域 -->
+                        <div class="zs-fileinfo">
+                            <t-card :title="zsObj.key.originalFilename" hover-shadow
+                                    v-if="zsObj.key.size != 0" class="zs-fileinfo-card">
+                                size : {{zsObj.key.size}}<br>
+                                algorithm: {{zsObj.key.algorithm}}
+                            </t-card>
+                            <t-card v-else title="未上传 .key 文件" class="zs-fileinfo-card" hover-shadow>
+                                size : -<br>
+                                algorithm: -
+                            </t-card>
+                            <t-card :title="zsObj.cert.originalFilename" hover-shadow
+                                    v-if="zsObj.cert.size != 0" class="zs-fileinfo-card">
+                                size : {{zsObj.cert.size}}<br>
+                                date : {{strDateToYMD(zsObj.cert.notBefore)}}至{{strDateToYMD(zsObj.cert.notAfter)}}<br>
+                                issuer : {{zsObj.cert.issuer}}<br>
+                                subject: {{zsObj.cert.subject}}
+                            </t-card>
+                            <t-card v-else title="未上传 .pem 文件" class="zs-fileinfo-card" hover-shadow>
+                                size : -<br>
+                                date : -<br>
+                                issuer : -<br>
+                                subject: -
+                            </t-card>
+                        </div>
+                        <div style="display: flex; flex-direction: row-reverse">
+                            <t-button @click="saveZs">保存</t-button>
+                        </div>
+                    </t-tab-panel>
+                    <t-tab-panel :value="2" label="从腾讯云导入">
+                        <div style="display: flex;margin: 2px">
+                            <t-input placeholder="请输入域名" clearable v-model="txyDomain"></t-input>
+                            &nbsp;
+                            <t-button variant="outline" @click="txySearchDomain">
+                                <template #icon>
+                                    <t-icon name="search" size="32"></t-icon>
+                                </template>
+                                查找证书
+                            </t-button>
+                        </div>
+                        <t-table :data="txyZsList" :columns="txyZsColumns">
+                            <template #ctrl="{ row }">
+                                <t-popconfirm content="确认添加吗" theme="warning" @confirm="addToJks(row)">
+                                    <t-button shape="square" variant="text">
+                                        <template #icon>
+                                            <t-tooltip content="添加到证书列表" placement="bottom">
+                                                <t-icon name="add" style="color: cadetblue;"></t-icon>
+                                            </t-tooltip>
+                                        </template>
+                                    </t-button>
+                                </t-popconfirm>
+                            </template>
+                            <template #status="{ row }">
+                                {{txyZsStatus(row.status)}}
+                            </template>
+                        </t-table>
+                    </t-tab-panel>
+                </t-tabs>
+
             </template>
         </t-dialog>
     </template>
@@ -158,11 +195,22 @@
                         }
                     }),
                     zsList: reactive([]),
-                    showZsList: reactive([])
+                    txyZsList: reactive([]),
+                    showZsList: reactive([]),
+                    txyDomain: ref(''),
+                    txyZsColumns: [
+                        {colKey: "certId", title: "证书Id", ellipsis: true},
+                        {colKey: "domainName", title: "域名", ellipsis: true},
+                        {colKey: "certBeginTime", title: "有效期起", ellipsis: true},
+                        {colKey: "certEndTime", title: "有效期止", ellipsis: true},
+                        {colKey: "insertTime", title: "创建时间", ellipsis: true},
+                        {colKey: "status", title: "状态"},
+                        {colKey: "ctrl", title: "操作"},
+                    ],
                 }
             },
             watch: {
-                search(newVal,oldVal) {
+                search(newVal, oldVal) {
                     this.showZsList.length = 0;
                     this.zsList.forEach(v => {
                         if (v.alias.indexOf(newVal) > -1) {
@@ -247,6 +295,10 @@
                     }
                 },
                 saveZs() {
+                    if (this.zsObj.key.saveFilename === '' || this.zsObj.cert.saveFilename === '') {
+                        MessagePlugin.error("请上传证书和私钥");
+                        return;
+                    }
                     axios.post('/keystore/save', {
                         key: this.zsObj.key,
                         cert: this.zsObj.cert
@@ -264,6 +316,44 @@
                         this.zsList.push(...res.data);
                         this.showZsList.push(...res.data);
                     })
+                },
+                txySearchDomain() {
+                    // if (this.txyDomain === '') {
+                    //     MessagePlugin.error("请输入域名");
+                    //     return;
+                    // }
+                    axios.get('/txy/search?domainName=' + this.txyDomain).then(res => {
+                        this.txyZsList.length = 0;
+                        this.txyZsList.push(...res.data);
+                    });
+                },
+                txyZsStatus(status) {
+                    // 证书状态：0 = 审核中，1 = 已通过，2 = 审核失败，3 = 已过期，4 = 已添加DNS记录，5 = 企业证书，待提交，
+                    // 6 = 订单取消中，7 = 已取消，8 = 已提交资料， 待上传确认函，9 = 证书吊销中，10 = 已吊销，
+                    // 11 = 重颁发中，12 = 待上传吊销确认函。
+                    switch (status) {
+                        case 0: return "审核中";
+                        case 1: return "已通过";
+                        case 2: return "审核失败";
+                        case 3: return "已过期";
+                        case 4: return "已添加DNS记录";
+                        case 5: return "企业证书，待提交";
+                        case 6: return "订单取消中";
+                        case 7: return "已取消";
+                        case 8: return "已提交资料，待上传确认函";
+                        case 9: return "证书吊销中";
+                        case 10: return "已吊销";
+                        case 11: return "重颁发中";
+                        case 12: return "待上传吊销确认函";
+                        default: return "未知";
+                    }
+                },
+                addToJks(row) {
+                    axios.post('/txy/addToJks', row).then(res => {
+                        if (res.data.xzbz) {
+                            MessagePlugin.success(res.data.domainName + "添加成功");
+                        }
+                    });
                 }
             }
         }
